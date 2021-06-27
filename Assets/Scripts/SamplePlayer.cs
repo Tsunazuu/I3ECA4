@@ -67,7 +67,7 @@ public class SamplePlayer : MonoBehaviour
     {
         while(currentState == "Idle")
         {
-            if(Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
+            if(Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0)
             {
                 nextState = "Moving";
             }
@@ -91,12 +91,12 @@ public class SamplePlayer : MonoBehaviour
     private void CheckRotation()
     {
         Vector3 playerRotation = transform.rotation.eulerAngles;
-        playerRotation.y += Input.GetAxis("Mouse X") * rotationSpeed * Time.deltaTime;
+        playerRotation.y += Input.GetAxisRaw("Mouse X") * rotationSpeed * Time.deltaTime;
 
         transform.rotation = Quaternion.Euler(playerRotation);
 
         Vector3 cameraRotation = playerCamera.transform.rotation.eulerAngles;
-        cameraRotation.x -= Input.GetAxis("Mouse Y") * rotationSpeed * Time.deltaTime;
+        cameraRotation.x -= Input.GetAxisRaw("Mouse Y") * rotationSpeed * Time.deltaTime;
 
         playerCamera.transform.rotation = Quaternion.Euler(cameraRotation);
     }
@@ -109,8 +109,8 @@ public class SamplePlayer : MonoBehaviour
     {
         Vector3 newPos = transform.position;
 
-        Vector3 xMovement = transform.right * Input.GetAxis("Horizontal");
-        Vector3 zMovement = transform.forward * Input.GetAxis("Vertical");
+        Vector3 xMovement = transform.right * Input.GetAxisRaw("Horizontal");
+        Vector3 zMovement = transform.forward * Input.GetAxisRaw("Vertical");
 
         Vector3 movementVector = xMovement + zMovement;
 
