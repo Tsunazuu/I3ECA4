@@ -24,11 +24,15 @@ public class SamplePlayer : MonoBehaviour
     [SerializeField]
     private float rotationSpeed;
 
+    [SerializeField]
+    private float interactionDistance;
+
     /// <summary>
     /// The camera attached to the player model.
     /// Should be dragged in from Inspector.
     /// </summary>
-    public Camera playerCamera;
+    [SerializeField]
+    private Camera playerCamera;
 
     private string currentState;
 
@@ -43,12 +47,33 @@ public class SamplePlayer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(nextState != currentState)
+        if (nextState != currentState)
         {
             SwitchState();
         }
 
         CheckRotation();
+        InteractionRaycast();
+    }
+
+    private void InteractionRaycast()
+    {
+        Debug.DrawLine(playerCamera.transform.position,
+                    playerCamera.transform.position + playerCamera.transform.forward * interactionDistance);
+
+        int layermask = 1 << LayerMask.NameToLayer("Interactable");
+
+        RaycastHit hitinfo;
+        if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward,
+            out hitinfo, interactionDistance, layermask))
+        {
+            // if my ray hits something, if statement is true
+            // do stuff here
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                hitinfo.transform.GetComponent<InteractableObject>().Interact();
+            }
+        }
     }
 
     /// <summary>
@@ -67,7 +92,7 @@ public class SamplePlayer : MonoBehaviour
     {
         while(currentState == "Idle")
         {
-            if(Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0)
+            if(Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
             {
                 nextState = "Moving";
             }
@@ -85,18 +110,17 @@ public class SamplePlayer : MonoBehaviour
             }
             yield return null;
         }
-        
     }
 
     private void CheckRotation()
     {
         Vector3 playerRotation = transform.rotation.eulerAngles;
-        playerRotation.y += Input.GetAxisRaw("Mouse X") * rotationSpeed * Time.deltaTime;
+        playerRotation.y += Input.GetAxis("Mouse X") * rotationSpeed * Time.deltaTime;
 
         transform.rotation = Quaternion.Euler(playerRotation);
 
         Vector3 cameraRotation = playerCamera.transform.rotation.eulerAngles;
-        cameraRotation.x -= Input.GetAxisRaw("Mouse Y") * rotationSpeed * Time.deltaTime;
+        cameraRotation.x -= Input.GetAxis("Mouse Y") * rotationSpeed * Time.deltaTime;
 
         playerCamera.transform.rotation = Quaternion.Euler(cameraRotation);
     }
@@ -109,8 +133,8 @@ public class SamplePlayer : MonoBehaviour
     {
         Vector3 newPos = transform.position;
 
-        Vector3 xMovement = transform.right * Input.GetAxisRaw("Horizontal");
-        Vector3 zMovement = transform.forward * Input.GetAxisRaw("Vertical");
+        Vector3 xMovement = transform.right * Input.GetAxis("Horizontal");
+        Vector3 zMovement = transform.forward * Input.GetAxis("Vertical");
 
         Vector3 movementVector = xMovement + zMovement;
 
@@ -120,12 +144,22 @@ public class SamplePlayer : MonoBehaviour
             newPos += movementVector;
 
             transform.position = newPos;
-            return false;
+            return true;
         }
         else
         {
-            return true;
+            return false;
         }
 
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        CollisionFunction(collision);
+    }
+
+    protected virtual void CollisionFunction(Collision collision)
+    {
+        Debug.Log("hi");
     }
 }
