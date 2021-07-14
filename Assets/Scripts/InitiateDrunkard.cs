@@ -18,11 +18,13 @@ public class InitiateDrunkard : MonoBehaviour
     public GameObject cameraPos;
     public GameObject sleepToken;
     public Text STQuest;
+    public GameObject barrier1;
     // Start is called before the first frame update
     void Start()
     {
         canvas.gameObject.SetActive(false);
         sleepToken.gameObject.SetActive(false);
+        var interactingPlayer = player.GetComponent<SamplePlayer>();
     }
 
     // Update is called once per frame
@@ -35,7 +37,7 @@ public class InitiateDrunkard : MonoBehaviour
 
     public void updateDrunkard1()
     {
-        drunkardText.text = "Nevermind, don't let me catch you again.";
+        drunkardText.text = "Drunkard: Nevermind, don't let me catch you again.";
         option1Text.text = "*You let out a sigh of relief*";
         option2.gameObject.SetActive(false);
         option1.onClick.AddListener(convoEnd);
@@ -43,11 +45,19 @@ public class InitiateDrunkard : MonoBehaviour
 
     public void updateDrunkard2()
     {
-        drunkardText.text = "You stare at me again?";
+        drunkardText.text = "Drunkard: You stare at me again?";
         option1Text.text = "Oh yeah? Come at me!";
         option2Text.text = "I'm sorry, may I please pass?";
         option1.onClick.AddListener(fightDrunkard);
-        option2.onClick.AddListener(updateDrunkard1);
+        option2.onClick.AddListener(updateDrunkard3);
+    }
+
+    public void updateDrunkard3()
+    {
+        drunkardText.text = "Drunkard: Nevermind, don't let me catch you again.";
+        option2Text.text = "*You let out a sigh of relief*";
+        option1.gameObject.SetActive(false);
+        option2.onClick.AddListener(convoEnd);
     }
 
     public void convoEnd()
@@ -60,6 +70,13 @@ public class InitiateDrunkard : MonoBehaviour
         updateQuestTextVendor();
         sleepToken.gameObject.SetActive(true);
         STQuest.gameObject.SetActive(true);
+        barrier1.gameObject.SetActive(false);
+        resetPlayer();
+    }
+
+    public void resetPlayer()
+    {
+        player.transform.GetComponent<SamplePlayer>().Unfreeze();
     }
 
     public void fightDrunkard()

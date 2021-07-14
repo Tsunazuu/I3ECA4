@@ -49,6 +49,12 @@ public class SamplePlayer : MonoBehaviour
     public int currentST;
     public int totalST;
 
+    //NPCs
+    public GameObject drunkard;
+    public GameObject vendor;
+    private int dCounter = 0;
+    private int vCounter = 0;
+
 
     // Start is called before the first frame update
     void Start()
@@ -81,6 +87,11 @@ public class SamplePlayer : MonoBehaviour
         InteractionRaycast();
     }
 
+    public void Unfreeze()
+    {
+        frozen = false;
+    }
+
     private void InteractionRaycast()
     {
         Debug.DrawLine(playerCamera.transform.position,
@@ -102,14 +113,13 @@ public class SamplePlayer : MonoBehaviour
                     updateQuestTextHome();
                 }
 
-                if (hitinfo.transform.tag == "Drunkard")
+                if (hitinfo.transform.tag == "Drunkard" && dCounter == 0)
                 {
                     Cursor.lockState = CursorLockMode.None;
                     Cursor.visible = true;
                     frozen = true;
                     hitinfo.transform.GetComponent<InitiateDrunkard>().Interact();
-                    frozen = false;
-                    Debug.Log("yes");
+                    dCounter += 1;
                 }
 
                 if (hitinfo.transform.tag == "SleepToken")
@@ -119,14 +129,16 @@ public class SamplePlayer : MonoBehaviour
                     updateQuestTextToken();
                 }
 
-                if (hitinfo.transform.tag == "Vendor")
+                if (hitinfo.transform.tag == "Vendor" && vCounter == 0)
                 {
                     Cursor.lockState = CursorLockMode.None;
                     Cursor.visible = true;
                     frozen = true;
-                    hitinfo.transform.GetComponent<InitiateVendor>().Interact(); 
+                    hitinfo.transform.GetComponent<InitiateVendor>().Interact();
+                    currentST += 1;
+                    updateQuestTextToken();
+                    vCounter += 1;
                 }
-
             }
         }
     }
