@@ -5,6 +5,11 @@ TagManager:
   serializedVersion: 2
   tags:
   - Selectable
+  - Car
+  - UpdateQuestLogArea1
+  - Drunkard
+  - SleepToken
+  - Vendor
   layers:
   - Default
   - TransparentFX

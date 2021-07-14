@@ -12,6 +12,7 @@ Date Created: 09/06/2021
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SamplePlayer : MonoBehaviour
 {
@@ -23,6 +24,8 @@ public class SamplePlayer : MonoBehaviour
 
     [SerializeField]
     private float rotationSpeed;
+
+    public bool frozen = false;
 
     [SerializeField]
     private float interactionDistance;
@@ -38,15 +41,37 @@ public class SamplePlayer : MonoBehaviour
 
     private string nextState;
 
+    //UI related stuff
+    public Text questText;
+    public Text STQuest;
+    
+    //Collectibles
+    public int currentST;
+    public int totalST;
+
+
     // Start is called before the first frame update
     void Start()
     {
         nextState = "Idle";
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        STQuest.gameObject.SetActive(false);
+        currentST = 0;
+        totalST = 3;
     }
 
     // Update is called once per frame
     void Update()
-    {
+    { 
+        if (frozen == true)
+        {
+            moveSpeed = 0;
+            rotationSpeed = 0;
+        } else {
+            moveSpeed = 5;
+            rotationSpeed = 170;
+        }
         if (nextState != currentState)
         {
             SwitchState();
@@ -71,9 +96,57 @@ public class SamplePlayer : MonoBehaviour
             // do stuff here
             if (Input.GetKeyDown(KeyCode.E))
             {
-                hitinfo.transform.GetComponent<InteractableObject>().Interact();
+                if (hitinfo.transform.tag == "Car")
+                {
+                    hitinfo.transform.GetComponent<InteractableObject>().Interact();
+                    updateQuestTextHome();
+                }
+
+                if (hitinfo.transform.tag == "Drunkard")
+                {
+                    Cursor.lockState = CursorLockMode.None;
+                    Cursor.visible = true;
+                    frozen = true;
+                    hitinfo.transform.GetComponent<InitiateDrunkard>().Interact();
+                    frozen = false;
+                    Debug.Log("yes");
+                }
+
+                if (hitinfo.transform.tag == "SleepToken")
+                {
+                    hitinfo.transform.GetComponent<InteractableObject>().Interact();
+                    currentST += 1;
+                    updateQuestTextToken();
+                }
+
+                if (hitinfo.transform.tag == "Vendor")
+                {
+                    Cursor.lockState = CursorLockMode.None;
+                    Cursor.visible = true;
+                    frozen = true;
+                    hitinfo.transform.GetComponent<InitiateVendor>().Interact(); 
+                }
+
             }
         }
+    }
+
+    private void updateQuestTextHome()
+    {
+        questText.text = "Find another way home";
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "UpdateQuestLogArea1")
+        {
+            questText.text = "Confront the drunkard";
+        }
+    }
+
+    private void updateQuestTextToken()
+    {
+        STQuest.text = "Collect Sleep Tokens: " + currentST +  "/" + totalST;
     }
 
     /// <summary>
