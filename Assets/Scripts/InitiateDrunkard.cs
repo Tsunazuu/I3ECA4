@@ -6,28 +6,50 @@ using UnityEngine.UI;
 public class InitiateDrunkard : MonoBehaviour
 {
     public GameObject canvas;
+    public GameObject battleCanvas;
     public Button option1;
     public Button option2;
+    public Button punch;
     public Text drunkardText;
     public Text option1Text;
     public Text option2Text;
     public bool frozen = false;
     public Text questText;
     public GameObject player;
-    public Camera playerCamera;
-    public GameObject cameraPos;
     public GameObject sleepToken;
     public Text STQuest;
     public GameObject barrier1;
+    public int maxHealth = 100;
+    public int currentHealth;
+    public int playerEnergy;
+    public HealthBar healthBar;
+    public Button nextBtn;
+    public Text battleText;
     // Start is called before the first frame update
     void Start()
     {
         canvas.gameObject.SetActive(false);
+        battleCanvas.gameObject.SetActive(false);
         sleepToken.gameObject.SetActive(false);
         var interactingPlayer = player.GetComponent<SamplePlayer>();
+        currentHealth = maxHealth;
+        healthBar.SetMaxHealth(maxHealth);
+        playerEnergy = 5;
+    }
+
+    void Update()
+    {
+
     }
 
     // Update is called once per frame
+
+    public void TakeDamage(int damage)
+    {
+        currentHealth -= damage;
+        healthBar.SetHealth(currentHealth);
+    }
+
     public void Interact()
     {
         canvas.gameObject.SetActive(true);
@@ -64,6 +86,7 @@ public class InitiateDrunkard : MonoBehaviour
     {
         option2.gameObject.SetActive(true);
         canvas.gameObject.SetActive(false);
+        battleCanvas.gameObject.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         frozen = false;
@@ -82,8 +105,47 @@ public class InitiateDrunkard : MonoBehaviour
     public void fightDrunkard()
     {
         canvas.gameObject.SetActive(false);
-        playerCamera.transform.position = cameraPos.transform.position;
-        playerCamera.transform.rotation = cameraPos.transform.rotation;
+        battleCanvas.gameObject.SetActive(true);
+        punch.gameObject.SetActive(false);
+        nextBtn.gameObject.SetActive(true);
+        nextBtn.onClick.AddListener(fightDrunkard1);
+        Debug.Log(currentHealth);
+    }
+
+    public void fightDrunkard1()
+    {
+        nextBtn.gameObject.SetActive(false);
+        punch.gameObject.SetActive(true);
+        battleText.text = "Choose an action.";
+        punch.onClick.AddListener(() => StartCoroutine(startBattle()));
+        Debug.Log(currentHealth);
+    }
+
+
+    public IEnumerator startBattle()
+    {
+        punch.gameObject.SetActive(false);
+        battleText.text = "You deal 20 damage to the Drunkard!"; 
+        TakeDamage(20);
+        Debug.Log(currentHealth);
+        if (currentHealth <= 0)
+        {
+            yield return new WaitForSeconds(2);
+            battleText.text = "Alright! Alright! Please don't hurt me!";
+            player.transform.GetComponent<SamplePlayer>().TakeDamage(-2);
+            yield return new WaitForSeconds(2);
+            battleText.text = "The drunkard has been defeated!";
+            punch.gameObject.SetActive(false);
+            yield return new WaitForSeconds(2);
+            convoEnd();
+        } else {
+            yield return new WaitForSeconds(2);
+            battleText.text = "The drunkard deals 5 damage to you!";
+            player.transform.GetComponent<SamplePlayer>().TakeDamage(5);
+            yield return new WaitForSeconds(2);
+            fightDrunkard1();
+        }
+        
     }
 
     private void updateQuestTextVendor()

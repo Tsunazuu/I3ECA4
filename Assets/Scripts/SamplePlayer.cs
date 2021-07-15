@@ -52,8 +52,14 @@ public class SamplePlayer : MonoBehaviour
     //NPCs
     public GameObject drunkard;
     public GameObject vendor;
+    private int cCounter = 0;
     private int dCounter = 0;
     private int vCounter = 0;
+
+    //Health
+    public int maxHealth = 100;
+    public int currentHealth;
+    public HealthBar healthBar;
 
 
     // Start is called before the first frame update
@@ -65,6 +71,8 @@ public class SamplePlayer : MonoBehaviour
         STQuest.gameObject.SetActive(false);
         currentST = 0;
         totalST = 3;
+        currentHealth = maxHealth;
+        healthBar.SetMaxHealth(maxHealth);
     }
 
     // Update is called once per frame
@@ -78,6 +86,12 @@ public class SamplePlayer : MonoBehaviour
             moveSpeed = 5;
             rotationSpeed = 170;
         }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            TakeDamage(20);
+        }
+
         if (nextState != currentState)
         {
             SwitchState();
@@ -85,6 +99,12 @@ public class SamplePlayer : MonoBehaviour
 
         CheckRotation();
         InteractionRaycast();
+    }
+
+    public void TakeDamage(int damage)
+    {
+        currentHealth -= damage;
+        healthBar.SetHealth(currentHealth);
     }
 
     public void Unfreeze()
@@ -107,10 +127,13 @@ public class SamplePlayer : MonoBehaviour
             // do stuff here
             if (Input.GetKeyDown(KeyCode.E))
             {
-                if (hitinfo.transform.tag == "Car")
+                if (hitinfo.transform.tag == "Car" && cCounter == 0)
                 {
-                    hitinfo.transform.GetComponent<InteractableObject>().Interact();
-                    updateQuestTextHome();
+                    Cursor.lockState = CursorLockMode.None;
+                    Cursor.visible = true;
+                    frozen = true;
+                    hitinfo.transform.GetComponent<InitiateCar>().Interact();
+                    cCounter += 1;
                 }
 
                 if (hitinfo.transform.tag == "Drunkard" && dCounter == 0)
@@ -141,11 +164,6 @@ public class SamplePlayer : MonoBehaviour
                 }
             }
         }
-    }
-
-    private void updateQuestTextHome()
-    {
-        questText.text = "Find another way home";
     }
 
     private void OnTriggerEnter(Collider other)
