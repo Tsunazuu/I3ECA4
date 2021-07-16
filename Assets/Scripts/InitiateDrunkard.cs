@@ -21,7 +21,6 @@ public class InitiateDrunkard : MonoBehaviour
     public GameObject barrier1;
     public int maxHealth = 100;
     public int currentHealth;
-    public int playerEnergy;
     public HealthBar healthBar;
     public Button nextBtn;
     public Text battleText;
@@ -31,10 +30,8 @@ public class InitiateDrunkard : MonoBehaviour
         canvas.gameObject.SetActive(false);
         battleCanvas.gameObject.SetActive(false);
         sleepToken.gameObject.SetActive(false);
-        var interactingPlayer = player.GetComponent<SamplePlayer>();
         currentHealth = maxHealth;
         healthBar.SetMaxHealth(maxHealth);
-        playerEnergy = 5;
     }
 
     void Update()
@@ -89,7 +86,6 @@ public class InitiateDrunkard : MonoBehaviour
         battleCanvas.gameObject.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        frozen = false;
         updateQuestTextVendor();
         sleepToken.gameObject.SetActive(true);
         STQuest.gameObject.SetActive(true);

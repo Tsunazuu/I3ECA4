@@ -7,6 +7,7 @@ public class InitiateCar : MonoBehaviour
 {
 
     public GameObject canvas;
+    public Button carButton;
     public GameObject player;
     public GameObject barrier;
     public Text playerText;
@@ -26,6 +27,7 @@ public class InitiateCar : MonoBehaviour
     public IEnumerator startCarText()
     {
         canvas.gameObject.SetActive(true);
+        carButton.gameObject.SetActive(false);
         var interactingPlayer = player.GetComponent<SamplePlayer>();
         yield return new WaitForSeconds(2);
         playerText.text = "Guess I should probably find another way home...";

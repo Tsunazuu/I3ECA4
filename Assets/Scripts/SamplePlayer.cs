@@ -44,6 +44,16 @@ public class SamplePlayer : MonoBehaviour
     //UI related stuff
     public Text questText;
     public Text STQuest;
+    public GameObject barrierUpdateQuest3;
+    public GameObject cameraPos;
+    public GameObject playerPos;
+    public GameObject canvasUI;
+    public Button carButton;
+    public Text playerText;
+    public GameObject karenBarrier;
+    public GameObject karenCamPos;
+    public GameObject karenPlayerPos;
+    public GameObject bedPlayerPos;
     
     //Collectibles
     public int currentST;
@@ -52,6 +62,7 @@ public class SamplePlayer : MonoBehaviour
     //NPCs
     public GameObject drunkard;
     public GameObject vendor;
+    public GameObject karen;
     private int cCounter = 0;
     private int dCounter = 0;
     private int vCounter = 0;
@@ -60,6 +71,7 @@ public class SamplePlayer : MonoBehaviour
     public int maxHealth = 100;
     public int currentHealth;
     public HealthBar healthBar;
+    public HealthBar healthBar2;
 
 
     // Start is called before the first frame update
@@ -73,6 +85,8 @@ public class SamplePlayer : MonoBehaviour
         totalST = 3;
         currentHealth = maxHealth;
         healthBar.SetMaxHealth(maxHealth);
+        healthBar2.SetMaxHealth(maxHealth);
+        canvasUI.gameObject.SetActive(false);
     }
 
     // Update is called once per frame
@@ -105,6 +119,7 @@ public class SamplePlayer : MonoBehaviour
     {
         currentHealth -= damage;
         healthBar.SetHealth(currentHealth);
+        healthBar2.SetHealth(currentHealth);
     }
 
     public void Unfreeze()
@@ -131,7 +146,7 @@ public class SamplePlayer : MonoBehaviour
                 {
                     Cursor.lockState = CursorLockMode.None;
                     Cursor.visible = true;
-                    frozen = true;
+                    frozen = true;  
                     hitinfo.transform.GetComponent<InitiateCar>().Interact();
                     cCounter += 1;
                 }
@@ -162,6 +177,14 @@ public class SamplePlayer : MonoBehaviour
                     updateQuestTextToken();
                     vCounter += 1;
                 }
+
+                if (hitinfo.transform.tag == "Bed")
+                {
+                    frozen = true;
+                    this.transform.position = bedPlayerPos.transform.position;
+                    this.transform.rotation = bedPlayerPos.transform.rotation;
+                    hitinfo.transform.GetComponent<InitiateBed>().Interact();
+                }
             }
         }
     }
@@ -172,6 +195,67 @@ public class SamplePlayer : MonoBehaviour
         {
             questText.text = "Confront the drunkard";
         }
+
+        if (other.tag == "BarrierQuest3")
+        {
+            this.transform.position = cameraPos.transform.position;
+            this.transform.rotation = cameraPos.transform.rotation;
+            canvasUI.gameObject.SetActive(true);
+            StartCoroutine(startPlayerText());
+        }
+
+        if (other.tag == "BarrierKaren")
+        {
+            canvasUI.gameObject.SetActive(true);
+            StartCoroutine(startKarenText());
+        }
+    }
+
+    public IEnumerator startPlayerText()
+    {
+        frozen = true;
+        canvasUI.gameObject.SetActive(true);
+        playerText.text = "This should be the right way home...";
+        yield return new WaitForSeconds(2);
+        playerText.text = "... if I remember correctly...";
+        yield return new WaitForSeconds(2);
+        canvasUI.gameObject.SetActive(false);
+        Unfreeze();
+        this.transform.position = playerPos.transform.position;
+        this.transform.rotation = playerPos.transform.rotation;
+    }
+
+    public IEnumerator startKarenText()
+    {
+        frozen = true;
+        canvasUI.gameObject.SetActive(true);
+        playerText.text = "*CRACK*";
+        yield return new WaitForSeconds(2);
+        playerText.text = "You step on a wooden plank on the floor";
+        yield return new WaitForSeconds(2);
+        playerText.text = "Karen: Oi! Who's making all that noise?!";
+        this.transform.position = karenCamPos.transform.position;
+        this.transform.rotation = karenCamPos.transform.rotation;
+        yield return new WaitForSeconds(2);
+        playerText.text = "Karen: You there! Get over here!";
+        yield return new WaitForSeconds(2);
+        this.transform.position = karenPlayerPos.transform.position;
+        this.transform.rotation = karenPlayerPos.transform.rotation;
+        playerText.text = "Karen: Why are you making so much noise at night when everyone is sleeping?!";
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        carButton.gameObject.SetActive(true);
+        carButton.onClick.AddListener(() => StartCoroutine(startKarenFight()));
+    }
+
+    public IEnumerator startKarenFight()
+    {
+        playerText.text = "Karen: You... you...! I'll teach you a lesson!";
+        carButton.gameObject.SetActive(false);
+        yield return new WaitForSeconds(2);
+        canvasUI.gameObject.SetActive(false);
+        karen.transform.GetComponent<InitiateKaren>().Interact();
+
     }
 
     private void updateQuestTextToken()
@@ -254,15 +338,5 @@ public class SamplePlayer : MonoBehaviour
             return false;
         }
 
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        CollisionFunction(collision);
-    }
-
-    protected virtual void CollisionFunction(Collision collision)
-    {
-        Debug.Log("hi");
     }
 }
