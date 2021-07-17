@@ -1,3 +1,14 @@
+/******************************************************************************
+Author: Aaron Tan Wei Heng & Royden Lim Yong Chee
+
+Name of Class: DemoPlayer
+
+Description of Class: This class will control the movement and actions of a 
+                        player avatar based on user input.
+
+Date Created: 09/06/2021
+******************************************************************************/
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -53,26 +64,7 @@ public class InitiateVendor : MonoBehaviour
         option1Text.text = "Thank you!";
         option1.gameObject.SetActive(true);
         continueBtn.gameObject.SetActive(false);
-        option1.onClick.AddListener(updateVendor4);
-    }
-
-    public void updateVendor4()
-    {
-        vendorText.text = "Vendor: Wait! Take this with you! I have no idea what it is, or what to do with it anyway.";
-        option2Text.text = "Oh... okay...";
-        option1.gameObject.SetActive(false);
-        continueBtn.gameObject.SetActive(false);
-        option2.gameObject.SetActive(true);
-        option2.onClick.AddListener(updateVendor5);
-    }
-
-    public void updateVendor5()
-    {
-        vendorText.text = "You received a Sleep Token!";
-        option1.gameObject.SetActive(false);
-        option2.gameObject.SetActive(false);
-        continueBtn.gameObject.SetActive(true);
-        continueBtn.onClick.AddListener(convoEnd);
+        option1.onClick.AddListener(convoEnd);
     }
 
     public void convoEnd()
@@ -82,6 +74,7 @@ public class InitiateVendor : MonoBehaviour
         Cursor.visible = false;
         updateQuestTextCont();
         STQuest.gameObject.SetActive(true);
+        player.transform.GetComponent<SamplePlayer>().updateQuestTextMango();
         resetPlayer();
     }
 

@@ -9,6 +9,7 @@ public class InitiateKaren : MonoBehaviour
     public GameObject battleCanvas;
     public Button punch;
     public Text battleText;
+    public Text questText;
     public int maxHealth = 100;
     public int playerMaxHealth = 100;
     public int currentHealth;
@@ -16,9 +17,6 @@ public class InitiateKaren : MonoBehaviour
     public HealthBar healthBar;
     public HealthBar playerHealthBar;
     public GameObject player;
-    public GameObject sleepToken;
-    public Text STQuest;
-
     
     // Start is called before the first frame update
     void Start()
@@ -59,7 +57,7 @@ public class InitiateKaren : MonoBehaviour
         if (currentHealth <= 0)
         {
             yield return new WaitForSeconds(2);
-            battleText.text = "Ugh... don't let me catch you again or you'll pay!";
+            battleText.text = "Karen: Ugh... don't let me catch you again or you'll pay!";
             playerTakeDamage(-2);
             yield return new WaitForSeconds(2);
             battleText.text = "The Karen has been defeated!";
@@ -81,6 +79,7 @@ public class InitiateKaren : MonoBehaviour
         battleCanvas.gameObject.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        questText.text = "Head home.";
         resetPlayer();
     }
 

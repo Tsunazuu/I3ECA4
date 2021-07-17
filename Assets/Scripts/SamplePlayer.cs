@@ -1,5 +1,5 @@
 /******************************************************************************
-Author: Elyas Chua-Aziz
+Author: Aaron Tan Wei Heng & Royden Lim Yong Chee
 
 Name of Class: DemoPlayer
 
@@ -13,6 +13,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class SamplePlayer : MonoBehaviour
 {
@@ -44,9 +45,18 @@ public class SamplePlayer : MonoBehaviour
     //UI related stuff
     public Text questText;
     public Text STQuest;
+    public Text STQuest1;
+    public Text STQuest2;
+    public Text belongingsQuest;
     public GameObject barrierUpdateQuest3;
     public GameObject cameraPos;
     public GameObject playerPos;
+    public GameObject officeDoorExitPos;
+    public GameObject officeDoorEnterPos;
+    public GameObject houseDoorEnterPos;
+    public GameObject houseDoorExitPos;
+    public GameObject roomDoorEnterPos;
+    public GameObject roomDoorExitPos;
     public GameObject canvasUI;
     public Button carButton;
     public Text playerText;
@@ -54,18 +64,26 @@ public class SamplePlayer : MonoBehaviour
     public GameObject karenCamPos;
     public GameObject karenPlayerPos;
     public GameObject bedPlayerPos;
+    public GameObject questCompleteCanvas;
+    public GameObject pauseMenu;
+    public Button resume;
+    public Button exit;
     
     //Collectibles
     public int currentST;
     public int totalST;
+    public int beer = 0;
+    public int mango = 0;
+    private int bCounter = 0;
+    private int camChangeCounter = 0;
 
     //NPCs
     public GameObject drunkard;
     public GameObject vendor;
     public GameObject karen;
     private int cCounter = 0;
-    private int dCounter = 0;
     private int vCounter = 0;
+    private int startCounter1 = 0;
 
     //Health
     public int maxHealth = 100;
@@ -81,12 +99,18 @@ public class SamplePlayer : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         STQuest.gameObject.SetActive(false);
+        STQuest1.gameObject.SetActive(false);
+        STQuest2.gameObject.SetActive(false);
         currentST = 0;
         totalST = 3;
         currentHealth = maxHealth;
         healthBar.SetMaxHealth(maxHealth);
         healthBar2.SetMaxHealth(maxHealth);
         canvasUI.gameObject.SetActive(false);
+        belongingsQuest.gameObject.SetActive(false);
+        questCompleteCanvas.gameObject.SetActive(false);
+        pauseMenu.gameObject.SetActive(false);
+        StartCoroutine(onLoadText());
     }
 
     // Update is called once per frame
@@ -111,8 +135,21 @@ public class SamplePlayer : MonoBehaviour
             SwitchState();
         }
 
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            pauseMenu.gameObject.SetActive(true);
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            PauseGame();
+        }
+
         CheckRotation();
         InteractionRaycast();
+    }
+
+    public void PauseGame ()
+    {
+        Time.timeScale = 0;
     }
 
     public void TakeDamage(int damage)
@@ -151,20 +188,26 @@ public class SamplePlayer : MonoBehaviour
                     cCounter += 1;
                 }
 
-                if (hitinfo.transform.tag == "Drunkard" && dCounter == 0)
-                {
-                    Cursor.lockState = CursorLockMode.None;
-                    Cursor.visible = true;
-                    frozen = true;
-                    hitinfo.transform.GetComponent<InitiateDrunkard>().Interact();
-                    dCounter += 1;
-                }
-
-                if (hitinfo.transform.tag == "SleepToken")
+                if (hitinfo.transform.tag == "BeerBottle")
                 {
                     hitinfo.transform.GetComponent<InteractableObject>().Interact();
-                    currentST += 1;
-                    updateQuestTextToken();
+                    updateQuestTextBB();
+                }
+
+                if (hitinfo.transform.tag == "Phone")
+                {
+                    hitinfo.transform.GetComponent<InteractableObject>().Interact();
+                    bCounter += 1;
+                    updateQuestTextBelongings();
+                    checkBelongings();
+                }
+
+                if (hitinfo.transform.tag == "Keys")
+                {
+                    hitinfo.transform.GetComponent<InteractableObject>().Interact();
+                    bCounter += 1;
+                    updateQuestTextBelongings();
+                    checkBelongings();
                 }
 
                 if (hitinfo.transform.tag == "Vendor" && vCounter == 0)
@@ -173,8 +216,7 @@ public class SamplePlayer : MonoBehaviour
                     Cursor.visible = true;
                     frozen = true;
                     hitinfo.transform.GetComponent<InitiateVendor>().Interact();
-                    currentST += 1;
-                    updateQuestTextToken();
+                    hitinfo.transform.GetComponent<InitiateVendor>().Interact();
                     vCounter += 1;
                 }
 
@@ -185,23 +227,74 @@ public class SamplePlayer : MonoBehaviour
                     this.transform.rotation = bedPlayerPos.transform.rotation;
                     hitinfo.transform.GetComponent<InitiateBed>().Interact();
                 }
+
+                if (hitinfo.transform.tag == "OfficeDoor")
+                {
+                    this.transform.position = officeDoorExitPos.transform.position;
+                    this.transform.rotation = officeDoorExitPos.transform.rotation;
+                    questText.text = "Get to the car.";
+                }
+
+                if (hitinfo.transform.tag == "OfficeDoorEnter")
+                {
+                    this.transform.position = officeDoorEnterPos.transform.position;
+                    this.transform.rotation = officeDoorEnterPos.transform.rotation;
+                }
+
+                if (hitinfo.transform.tag == "HouseDoorEnter")
+                {
+                    if (bCounter > 1 && beer == 1)
+                    {
+                        this.transform.position = houseDoorEnterPos.transform.position;
+                        this.transform.rotation = houseDoorEnterPos.transform.rotation;
+                        Debug.Log(bCounter);
+                        Debug.Log(beer);
+                        Debug.Log(mango);
+                    } else {
+                    StartCoroutine(noCollectibles());
+                    }
+                }
+
+                if (hitinfo.transform.tag == "HouseDoorExit")
+                {
+                    this.transform.position = houseDoorExitPos.transform.position;
+                    this.transform.rotation = houseDoorExitPos.transform.rotation;
+                }
+                    
+                if (hitinfo.transform.tag == "RoomDoorEnter")
+                {
+                    this.transform.position = roomDoorEnterPos.transform.position;
+                    this.transform.rotation = roomDoorEnterPos.transform.rotation;
+                }
+
+                if (hitinfo.transform.tag == "RoomDoorExit")
+                {
+                    this.transform.position = roomDoorExitPos.transform.position;
+                    this.transform.rotation = roomDoorExitPos.transform.rotation;
+                }
             }
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "UpdateQuestLogArea1")
+        if (other.tag == "UpdateQuestLogArea1" && startCounter1 == 0)
         {
-            questText.text = "Confront the drunkard";
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            frozen = true;
+            drunkard.transform.GetComponent<InitiateDrunkard>().preInteract();
+            startCounter1 += 1;
         }
 
-        if (other.tag == "BarrierQuest3")
+        if (other.tag == "BarrierQuest3" && camChangeCounter == 0)
         {
             this.transform.position = cameraPos.transform.position;
             this.transform.rotation = cameraPos.transform.rotation;
+            questText.text = "Enter the narrow alley.";
             canvasUI.gameObject.SetActive(true);
             StartCoroutine(startPlayerText());
+            camChangeCounter += 1;
         }
 
         if (other.tag == "BarrierKaren")
@@ -209,6 +302,36 @@ public class SamplePlayer : MonoBehaviour
             canvasUI.gameObject.SetActive(true);
             StartCoroutine(startKarenText());
         }
+    }
+
+    public IEnumerator noCollectibles()
+    {
+        canvasUI.gameObject.SetActive(true);
+        frozen = true;
+        playerText.text = "Hmm... did I forget something?";
+        yield return new WaitForSeconds(2);
+        canvasUI.gameObject.SetActive(false);
+        Unfreeze();
+    }
+    
+    public void updateQuestTextBelongings()
+    {
+        belongingsQuest.text = "Pick up belongings: " + bCounter + "/" + "2";
+    }
+
+    public IEnumerator onLoadText()
+    {
+        frozen = true;
+        questText.text = "Leave the office.";
+        canvasUI.gameObject.SetActive(true);
+        carButton.gameObject.SetActive(false);
+        playerText.text = "Arghh... I hate this job... Always working overtime...";
+        yield return new WaitForSeconds(2);
+        playerText.text = "Well, it's time to head home...";
+        yield return new WaitForSeconds(2);
+        belongingsQuest.gameObject.SetActive(true);
+        canvasUI.gameObject.SetActive(false);
+        Unfreeze();
     }
 
     public IEnumerator startPlayerText()
@@ -229,6 +352,7 @@ public class SamplePlayer : MonoBehaviour
     {
         frozen = true;
         canvasUI.gameObject.SetActive(true);
+        carButton.gameObject.SetActive(false);
         playerText.text = "*CRACK*";
         yield return new WaitForSeconds(2);
         playerText.text = "You step on a wooden plank on the floor";
@@ -238,6 +362,7 @@ public class SamplePlayer : MonoBehaviour
         this.transform.rotation = karenCamPos.transform.rotation;
         yield return new WaitForSeconds(2);
         playerText.text = "Karen: You there! Get over here!";
+        questText.text = "Confront the Karen.";
         yield return new WaitForSeconds(2);
         this.transform.position = karenPlayerPos.transform.position;
         this.transform.rotation = karenPlayerPos.transform.rotation;
@@ -251,6 +376,7 @@ public class SamplePlayer : MonoBehaviour
     public IEnumerator startKarenFight()
     {
         playerText.text = "Karen: You... you...! I'll teach you a lesson!";
+        questText.text = "Defeat the Karen";
         carButton.gameObject.SetActive(false);
         yield return new WaitForSeconds(2);
         canvasUI.gameObject.SetActive(false);
@@ -258,9 +384,33 @@ public class SamplePlayer : MonoBehaviour
 
     }
 
-    private void updateQuestTextToken()
+    private void checkBelongings()
     {
-        STQuest.text = "Collect Sleep Tokens: " + currentST +  "/" + totalST;
+        if (bCounter == 2)
+        {
+            StartCoroutine(questComplete());
+        }
+    }
+
+    private void updateQuestTextBB()
+    {
+        STQuest1.text = "Beer: 1/1";
+        beer += 1;
+        StartCoroutine(questComplete());
+    }
+
+    public void updateQuestTextMango()
+    {
+        STQuest2.text = "Mango: 1/1";
+        mango += 1;
+        StartCoroutine(questComplete());
+    }
+
+    public IEnumerator questComplete()
+    {
+        questCompleteCanvas.gameObject.SetActive(true);
+        yield return new WaitForSeconds(1.5f);
+        questCompleteCanvas.gameObject.SetActive(false);
     }
 
     /// <summary>

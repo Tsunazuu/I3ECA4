@@ -1,3 +1,14 @@
+/******************************************************************************
+Author: Aaron Tan Wei Heng & Royden Lim Yong Chee
+
+Name of Class: DemoPlayer
+
+Description of Class: This class will control the movement and actions of a 
+                        player avatar based on user input.
+
+Date Created: 09/06/2021
+******************************************************************************/
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

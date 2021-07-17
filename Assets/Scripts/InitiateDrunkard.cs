@@ -1,3 +1,14 @@
+/******************************************************************************
+Author: Aaron Tan Wei Heng & Royden Lim Yong Chee
+
+Name of Class: DemoPlayer
+
+Description of Class: This class will control the movement and actions of a 
+                        player avatar based on user input.
+
+Date Created: 09/06/2021
+******************************************************************************/
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,12 +29,16 @@ public class InitiateDrunkard : MonoBehaviour
     public GameObject player;
     public GameObject sleepToken;
     public Text STQuest;
+    public Text STQuest1;
+    public Text STQuest2;
     public GameObject barrier1;
     public int maxHealth = 100;
     public int currentHealth;
     public HealthBar healthBar;
     public Button nextBtn;
     public Text battleText;
+    public GameObject drunkardPlayerPos;
+    public GameObject drunkardCamPos;
     // Start is called before the first frame update
     void Start()
     {
@@ -47,9 +62,26 @@ public class InitiateDrunkard : MonoBehaviour
         healthBar.SetHealth(currentHealth);
     }
 
-    public void Interact()
+    public void preInteract()
     {
         canvas.gameObject.SetActive(true);
+        player.transform.position = drunkardCamPos.transform.position;
+        player.transform.rotation = drunkardCamPos.transform.rotation;
+        drunkardText.text = "Oi! You there! Come here!";
+        option1.gameObject.SetActive(false);
+        option2.gameObject.SetActive(false);
+        questText.text = "Confront the drunkard.";
+        StartCoroutine(Interact());
+    }
+
+    public IEnumerator Interact()
+    {
+        yield return new WaitForSeconds(1.5f);  
+        drunkardText.text = "You stare what stare?";
+        player.transform.position = drunkardPlayerPos.transform.position;
+        player.transform.rotation = drunkardPlayerPos.transform.rotation;
+        option1.gameObject.SetActive(true);
+        option2.gameObject.SetActive(true);
         option1.onClick.AddListener(updateDrunkard1);
         option2.onClick.AddListener(updateDrunkard2);
     }
@@ -89,6 +121,8 @@ public class InitiateDrunkard : MonoBehaviour
         updateQuestTextVendor();
         sleepToken.gameObject.SetActive(true);
         STQuest.gameObject.SetActive(true);
+        STQuest1.gameObject.SetActive(true);
+        STQuest2.gameObject.SetActive(true);
         barrier1.gameObject.SetActive(false);
         resetPlayer();
     }
@@ -127,7 +161,7 @@ public class InitiateDrunkard : MonoBehaviour
         if (currentHealth <= 0)
         {
             yield return new WaitForSeconds(2);
-            battleText.text = "Alright! Alright! Please don't hurt me!";
+            battleText.text = "Drunkard: Alright! Alright! Please don't hurt me!";
             player.transform.GetComponent<SamplePlayer>().TakeDamage(-2);
             yield return new WaitForSeconds(2);
             battleText.text = "The drunkard has been defeated!";
